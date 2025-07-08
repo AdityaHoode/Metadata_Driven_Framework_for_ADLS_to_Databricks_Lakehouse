@@ -1,0 +1,43 @@
+resources:
+  jobs:
+    PL_MDF2_SourceToBronze:
+      name: PL_MDF2_SourceToBronze
+      tasks:
+        - task_key: get_file_configs
+          notebook_task:
+            notebook_path: /Workspace/MDFs/ADLS to Lakehouse/NB_GetFileMasterConfig
+            source: WORKSPACE
+          existing_cluster_id: <>
+        - task_key: source_to_bronze
+          depends_on:
+            - task_key: get_file_configs
+          for_each_task:
+            inputs: "{{tasks.get_file_configs.values.mappings}}"
+            concurrency: 5
+            task:
+              task_key: source_to_bronze_iteration
+              notebook_task:
+                notebook_path: /Workspace/MDFs/ADLS to Lakehouse/NB_SourceToBronze
+                base_parameters:
+                  mappings: "{{input}}"
+                source: WORKSPACE
+              existing_cluster_id: <>
+        - task_key: update_lp_watermark_value
+          depends_on:
+            - task_key: source_to_bronze
+          run_if: ALL_DONE
+          notebook_task:
+            notebook_path: /Workspace/MDFs/ADLS to Lakehouse/NB_UpdateWatermarkValue
+            source: WORKSPACE
+          existing_cluster_id: <>
+      queue:
+        enabled: true
+      parameters:
+        - name: JobName
+          default: "{{job.name}}"
+        - name: JobRunID
+          default: "{{job.id}}"
+        - name: catalog
+          default: mdf2
+        - name: schema
+          default: bronze

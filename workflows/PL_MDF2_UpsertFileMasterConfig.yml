@@ -1,0 +1,37 @@
+resources:
+  jobs:
+    PL_MDF2_UpsertFileMasterConfig:
+      name: PL_MDF2_UpsertFileMasterConfig
+      tasks:
+        - task_key: upsert_file_master_config
+          notebook_task:
+            notebook_path: /Workspace/MDFs/ADLS to Lakehouse/NB_UpsertFileMasterConfig
+            source: WORKSPACE
+          existing_cluster_id: <>
+      queue:
+        enabled: true
+      parameters:
+        - name: baseUrl
+          default: <>
+        - name: columnList
+          default: ""
+        - name: enableFlag
+          default: "1"
+        - name: fileSearchTerm
+          default: ""
+        - name: fmcCatalog
+          default: mdf2
+        - name: fmcSchema
+          default: bronze
+        - name: lpWatermarkValue
+          default: 1970-01-01 00:00:00
+        - name: rootFolder
+          default: ProductDataLandingZone
+        - name: targetCatalog
+          default: mdf2
+        - name: targetSchema
+          default: bronze
+        - name: targetTable
+          default: Product
+        - name: watermarkColumn
+          default: Timestamp
